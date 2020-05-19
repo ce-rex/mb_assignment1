@@ -11,6 +11,7 @@ fn = fieldnames(data);
 %% Kovarianzmatrix
 for i=1:numel(fn)
     D = data.(fn{i});
+    %D = [4 2 0.5; 4.2 2.1 0.59; 3.9 2.0 0.58; 4.3 2.1 0.62; 4.1 2.2 0.63];
     
     % Kovarianzmatrix ourCov
     C = ourCov(D);
@@ -26,7 +27,18 @@ for i=1:numel(fn)
     
 end
 
-%% PCA
+%% Principal Component Analysis
+for i=1:numel(fn)
+    D = data.(fn{i});
+    %D = [4 2 0.5; 4.2 2.1 0.59; 3.9 2.0 0.58; 4.3 2.1 0.62; 4.1 2.2 0.63];
+    
+    %PCA
+    [e_val, e_vec] = pca(D);
+    
+    %Plot
+    plot2DPCA()
+    
+end
 
 %% Unterraum-Projektion
 
