@@ -13,9 +13,16 @@ for i=1:numel(fn)
     D = data.(fn{i});
     
     % Kovarianzmatrix ourCov
-    
+    C = ourCov(D);
     % Kovarianzmatrix Matlab cov
     C_m = cov(D);
+    
+    if C == C_m
+        fprintf("covariance matrices are equal\n")
+    end
+    
+    plot(C)
+    %axis equal;
     
 end
 
