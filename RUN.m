@@ -36,7 +36,7 @@ for i=1:numel(fn)
     [e_val, e_vec] = pca(D);
     
     %Plot
-    plot2DPCA()
+    plot2DPCA(D, mean(D), 0, e_vec, e_val, 0, 0)
     
 end
 
