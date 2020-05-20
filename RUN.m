@@ -11,32 +11,30 @@ fn = fieldnames(data);
 %% Kovarianzmatrix
 for i=1:numel(fn)
     D = data.(fn{i});
-    %D = [4 2 0.5; 4.2 2.1 0.59; 3.9 2.0 0.58; 4.3 2.1 0.62; 4.1 2.2 0.63];
     
     % Kovarianzmatrix ourCov
     C = ourCov(D);
     % Kovarianzmatrix Matlab cov
     C_m = cov(D);
     
-    if C == C_m
-        fprintf("covariance matrices are equal\n")
-    end
+    %if C == C_m
+    %    fprintf("covariance matrices are equal\n")
+    %end
     
-    plot(C)
+    plot(D)
     %axis equal;
-    
+        
 end
 
 %% Principal Component Analysis
 for i=1:numel(fn)
     D = data.(fn{i});
-    %D = [4 2 0.5; 4.2 2.1 0.59; 3.9 2.0 0.58; 4.3 2.1 0.62; 4.1 2.2 0.63];
     
     %PCA
-    [e_val, e_vec] = pca(D);
+    [eigval, eigvec] = pca(D);
     
-    %Plot
-    plot2DPCA(D, mean(D), 0, e_vec, e_val, 0, 0)
+    %Plot 2D
+    plot2DPCA(D', mean(D, 2), 0, eigvec, eigval, 1, 0)
     
 end
 

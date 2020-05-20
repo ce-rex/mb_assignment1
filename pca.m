@@ -1,29 +1,15 @@
-function [e_val, e_vec] = pca(D)
+function [eigval, eigvec] = pca(D)
 %PCA Summary of this function goes here
 %   Detailed explanation goes here
 
-% Anzahl der Datenpunkte
-n = size(D,1);
-
-% Einsvektor mit Länge n 
-one_vector = ones(1, n);
-
-% berechnet den Mittelwert jeder Spalte
-% (one_vector * D) berechnet die Summe jeder Spalte
-d_mean = (one_vector * D) / n;
-
-% von jedem Wert in D wird der Mittelwert seiner Spalte abgezogen 
-% c_mean(one_vector, :) dubliziert die 
-D = D - d_mean(one_vector, :);
-
-% Eigenvectoren und Eigenvalues berechnen
-[eigenvectors, eigenvalues] = eig(ourCov(D));
+% Eigenvektoren und Eigenvalues berechnen
+[eigvec, eigval] = eig(ourCov(D'));
 
 % Eigenwerte absteigend sortieren
-[e_val,ind] = sort(diag(eigenvalues),'descend');
+[eigval,ind] = sort(diag(eigval),'descend'); 
 
 % Eigenvektoren nach absteigenden Eigenwerten sortieren
-e_vec = eigenvectors(ind, :);
+eigvec = transpose(eigvec(ind, :));
 
 end
 
