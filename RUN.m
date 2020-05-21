@@ -19,12 +19,14 @@ for i=1:numel(fn)
     
     %if C == C_m
     %    fprintf("covariance matrices are equal\n")
-    %end
+    %end 
     
-    plot(D)
-    %axis equal;
+    figure(i)
+    scatter(D(1,:), D(2,:))
+    axis equal;
         
 end
+
 
 %% Principal Component Analysis
 for i=1:numel(fn)
