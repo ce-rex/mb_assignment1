@@ -44,6 +44,17 @@ end
 
 %% Untersuchungen in 3D
 
+data = load(data_path + "/daten3d.mat");
+D = data.data;
+
+%PCA
+[eigval, eigvec] = pca(D);
+mju = mean(D, 2)
+
+plot3DPCA(D', mju', eigvec, eigval)
+
+
+
 %% Shape Modell
 
 
