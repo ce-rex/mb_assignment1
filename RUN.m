@@ -103,7 +103,19 @@ D = data.data;
 [eigval, eigvec] = ourPca(D);
 mju = mean(D, 2);
 
-plot3DPCA(D', mju', eigvec, eigval, 0, 1)
+% plot data, eigenvectors and ellipsoids of standard deviation
+plot3DPCA(D', mju', eigvec, eigval, 1, 0);
+
+% project to 2D space
+data_projected = projection(eigvec(:,1:2), D);
+
+% plot projection
+figure(5)
+scatter(data_projected(1,:), data_projected(2,:));
+title('Projected data3d in 2D space');
+
+% plot original and reconstructed data points
+plot3DPCA(D', mju', eigvec, eigval, 0, 1);
 
 
 
