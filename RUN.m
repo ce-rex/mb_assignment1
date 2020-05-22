@@ -117,7 +117,7 @@ for i=1:size(shapes, 3)
     D = shapes(:,:,i)';
     
     %PCA
-    [eigval, eigvec] = pca(D);
+    [eigval, eigvec] = ourPca(D);
     
     %Plot 2D
     plot2DPCA(D', mean(D, 2), 0, eigvec, eigval, 1, 0)
