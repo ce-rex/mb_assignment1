@@ -33,7 +33,7 @@ for i=1:numel(fn)
     D = data.(fn{i});
     
     %PCA
-    [eigval, eigvec] = pca(D);
+    [eigval, eigvec] = ourPca(D);
     
     %Plot 2D
     plot2DPCA(D', mean(D, 2), 0, eigvec, eigval, 1, 0)
@@ -48,13 +48,26 @@ data = load(data_path + "/daten3d.mat");
 D = data.data;
 
 %PCA
-[eigval, eigvec] = pca(D);
-mju = mean(D, 2)
+[eigval, eigvec] = ourPca(D);
+mju = mean(D, 2);
 
-plot3DPCA(D', mju', eigvec, eigval)
+plot3DPCA(D', mju', eigvec, eigval, 0, 1)
 
 
 
 %% Shape Modell
 
+data = load(data_path + "/shapes.mat");
+shapes = data.aligned;
 
+for i=1:size(shapes, 3)
+    
+    D = shapes(:,:,i)';
+    
+    %PCA
+    [eigval, eigvec] = pca(D);
+    
+    %Plot 2D
+    plot2DPCA(D', mean(D, 2), 0, eigvec, eigval, 1, 0)
+
+end
