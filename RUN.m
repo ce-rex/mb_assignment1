@@ -31,6 +31,8 @@ end
 
 
 %% Principal Component Analysis
+
+% identify modes
 for i=1:numel(fn)
     D = data.(fn{i});
     
@@ -109,17 +111,22 @@ plot3DPCA(D', mju', eigvec, eigval, 0, 1)
 
 %% Shape Modell
 
+% load data
+addpath('beispiel_pca_material');
+data_path = "beispiel_pca_material";
 data = load(data_path + "/shapes.mat");
 shapes = data.aligned;
 
-for i=1:size(shapes, 3)
-    
-    D = shapes(:,:,i)';
-    
-    %PCA
-    [eigval, eigvec] = ourPca(D);
-    
-    %Plot 2D
-    plot2DPCA(D', mean(D, 2), 0, eigvec, eigval, 1, 0)
+% flatten shapes to make them digestable for ourPca. yum
+shapes_flattened = reshape(shapes, 256, 14);
 
-end
+% perform pca on the flattened shapes
+[eigval, eigvec] = ourPca(shapes_flattened);
+
+% generate shape from the standard deviations of modes 1 to 5
+generated_shape = generateShape(sqrt(eigval(1:5)));
+
+% plot generated shape
+figure(1)
+scatter(generated_shape(:, 1), generated_shape(:, 2));
+title("Shape generated based on 5 modes")
