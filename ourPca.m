@@ -1,4 +1,4 @@
-function [eigval, eigvec] = pca(D)
+function [eigval, eigvec] = ourPca(D)
 %PCA Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -9,7 +9,7 @@ function [eigval, eigvec] = pca(D)
 [eigval,ind] = sort(diag(eigval),'descend'); 
 
 % Eigenvektoren nach absteigenden Eigenwerten sortieren
-eigvec = transpose(eigvec(ind, :));
-
+% eigvec = transpose(eigvec(ind, :));
+eigvec = eigvec(:, ind);
 end
 
