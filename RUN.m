@@ -46,7 +46,7 @@ end
 D = data.data3;
     
 %PCA
-[eigval, eigvec] = pca(D);
+[eigval, eigvec] = ourPca(D);
 
 figure(1)
 scatter(D(1,:), D(2,:))
