@@ -142,3 +142,16 @@ generated_shape = generateShape(sqrt(eigval(1:5)));
 figure(1)
 scatter(generated_shape(:, 1), generated_shape(:, 2));
 title("Shape generated based on 5 modes")
+
+
+mean_shapes = mean(shapes, 3);
+% std_shapes = std(shapes, [], 3);
+std_shapes = std(shapes_flattened);
+%scatter(std_shapes(:, 1), std_shapes(:, 2))
+
+% Exemplary loop for 5 modes, can be adapted
+for i=1:5
+   plotShape(reshape(eigvec(:,i), 128, 2), mean_shapes, std_shapes(i), i) 
+end
+
+
