@@ -150,7 +150,7 @@ std_shapes = sqrt(eigval);
 %scatter(std_shapes(:, 1), std_shapes(:, 2))
 
 % Exemplary loop for 5 modes, can be adapted
-for i=1:5
+for i=1:14
    plotShape(reshape(eigvec(:,i), 128, 2), mean_shapes, std_shapes(i), i) 
 end
 
