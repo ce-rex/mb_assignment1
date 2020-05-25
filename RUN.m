@@ -154,4 +154,27 @@ for i=1:14
    plotShape(reshape(eigvec(:,i), 128, 2), mean_shapes, std_shapes(i), i) 
 end
 
+%%% create random b generator based on standard deviations
+% list of number of eigenvectors to use
+variance_fractions = [1, 0.95, 0.9, 0.8];
+
+for target_fraction=variance_fractions
+    for nEigenvectors=1:length(eigval)
+        
+        variance_fraction = sum(eigval(1:nEigenvectors))/sum(eigval);
+        if variance_fraction >= target_fraction
+            % generate b using the given number of eigenvectors
+            disp(nEigenvectors)
+            disp(variance_fraction)
+            b = randn(1,nEigenvectors)' .* std_shapes(1:nEigenvectors);
+            generated_shape = generateShape(b);
+            
+            % plot generated shape
+            figure()
+            scatter(generated_shape(:, 1), generated_shape(:, 2));
+            title({['Generated shape based on ', num2str(nEigenvectors), ' modes.'], ['Covers ', num2str(variance_fraction * 100), '% of total variance.']})
+            break
+        end
+    end
+end
 
