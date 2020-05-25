@@ -1,15 +1,12 @@
 function [eigval, eigvec] = ourPca(D)
-%PCA Summary of this function goes here
-%   Detailed explanation goes here
+%ourPca computes a PCA over D
 
-% Eigenvektoren und Eigenvalues berechnen
+% Calculates Eigenvalues and Eigenvectors
 [eigvec, eigval] = eig(ourCov(D'));
 
-% Eigenwerte absteigend sortieren
+% Sort Eigenvalues descending
 [eigval,ind] = sort(diag(eigval),'descend'); 
-
-% Eigenvektoren nach absteigenden Eigenwerten sortieren
-% eigvec = transpose(eigvec(ind, :));
 eigvec = eigvec(:, ind);
+
 end
 

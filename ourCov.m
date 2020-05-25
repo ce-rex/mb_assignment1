@@ -1,22 +1,20 @@
 function C = ourCov(D)
-% Berechnet die Kovarianzmatrix für D
+% Calculates the covariance matrix of D
 
-% Anzahl der Datenpunkte
+% Number of data points
 n = size(D,1);
 
-% Einsvektor mit Länge n 
+% Ones-vector of length n
 one_vector = ones(1, n);
 
-% berechnet den Mittelwert jeder Spalte
-% (one_vector * D) berechnet die Summe jeder Spalte
+% Calculates the mean of each column
+% (one_vector * D) calculates the sum of each column
 d_mean = (one_vector * D) / n;
 
-% von jedem Wert in D wird der Mittelwert seiner Spalte abgezogen 
-% c_mean(one_vector, :) dubliziert die 
+% The mean of a column is substracted from the corresponding column 
 D_substract_mean = D - d_mean(one_vector, :);
 
-% berechnet die Kovarianzmatrix
+% Calculates the covariance matrix
 C = (D_substract_mean.' * D_substract_mean) / (n - 1);
 
 end
-

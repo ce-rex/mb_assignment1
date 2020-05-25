@@ -8,7 +8,8 @@ end
 xlimPlot = [-100, 100];
 ylimPlot = [-180, 170];
 
-figure();
+figure()
+hold on
 
 for i=1:7
     if i ~= 4
