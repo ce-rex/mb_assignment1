@@ -146,7 +146,7 @@ title("Shape generated based on 5 modes")
 
 mean_shapes = mean(shapes, 3);
 % std_shapes = std(shapes, [], 3);
-std_shapes = std(shapes_flattened);
+std_shapes = sqrt(eigval);
 %scatter(std_shapes(:, 1), std_shapes(:, 2))
 
 % Exemplary loop for 5 modes, can be adapted
