@@ -17,14 +17,7 @@ for i=1:numel(fn)
     
     % Covariance matrix ourCov
     C = ourCov(D);
-    % Covariance matrix Matlab cov
-    C_m = cov(D);
-    
-    % Checks if results are equal
-    % if C == C_m
-    %    fprintf("covariance matrices are equal\n")
-    % end 
-    
+
     % Data plots
     figure()
     scatter(D(1,:), D(2,:))
@@ -36,7 +29,6 @@ end
 
 %% Principal Component Analysis
 
-% identify modes
 for i=1:numel(fn)
     D = data.(fn{i});
     

@@ -14,6 +14,9 @@ d_mean = (one_vector * D) / n;
 % The mean of a column is substracted from the corresponding column 
 D_substract_mean = D - d_mean(one_vector, :);
 
+% For 2.2.2 d) do not substract mean
+%D_substract_mean = D;
+
 % Calculates the covariance matrix
 C = (D_substract_mean.' * D_substract_mean) / (n - 1);
 
