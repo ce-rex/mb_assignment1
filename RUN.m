@@ -159,7 +159,7 @@ std_shapes = sqrt(eigval);
 % Exemplary loop for 14 modes, can be adapted - due to 14 training samples,
 % the standard deviation of the 14th and later modes is 0
 for i=1:14
-   plotShape(reshape(eigvec(:,i), 128, 2), mean_shapes, std_shapes(i), i) 
+  plotShape(reshape(eigvec(:,i), 128, 2), mean_shapes, std_shapes(i), i) 
 end
 
 %%% Create random b generator based on standard deviations
@@ -168,23 +168,35 @@ end
 % covered in our case
 variance_fractions = [1, 0.95, 0.9, 0.75];
 
+% set seed for random number generation
+rng(120)
+% Generate b using all eigenvectors
+b_all = randn(1,256)' .* std_shapes;
+disp(b_all(1:13) ./ std_shapes(1:13))
+
+figure()
+plots = [];
+labels = [];
 for target_fraction=variance_fractions
     for nEigenvectors=1:length(eigval)
         
         variance_fraction = sum(eigval(1:nEigenvectors))/sum(eigval);
         if variance_fraction >= target_fraction
-            % Generate b using the given number of eigenvectors
-            b = randn(1,nEigenvectors)' .* std_shapes(1:nEigenvectors);
+            % clip b to given number of eigenvectors
+            b = b_all(1:nEigenvectors);
             generated_shape = generateShape(b);
             
             % Plot generated shape
-            figure()
-            scatter(generated_shape(:, 1), generated_shape(:, 2))
-            title({['Generated shape based on ', num2str(nEigenvectors), ' modes.'], ['Covers ', num2str(variance_fraction * 100), '% of total variance.']});
-            xlim([-100, 100]);
-            ylim([-170, 180]);
+            hold on;
+            s = plot(generated_shape(:, 1), generated_shape(:, 2));
+            plots = [plots s];
+            label = sprintf("%s", [num2str(nEigenvectors), ' modes (', num2str(variance_fraction * 100), '% of total var.)']);
+            labels = [labels label];
             break
         end
     end
 end
-
+xlim([-100, 100]);
+ylim([-170, 180]);
+legend(plots, labels);
+title("Overlay of generated shapes using a different number of modes.")
