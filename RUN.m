@@ -7,6 +7,19 @@ addpath(data_path);
 providedFunctions_path = "providedFunctions";
 addpath(providedFunctions_path);
 
-%% generateShape
+%% shape model
 
-% hello
+% code
+
+%% feature extraction
+
+% code
+
+%% classification & feature selection
+
+% code
+
+%% shape particle filters
+
+% code
+
