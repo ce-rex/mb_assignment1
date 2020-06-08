@@ -119,9 +119,56 @@ title('Y-Coordinates');
 sample31_mask = cell2mat(handdata.masks(31));
 sample31_landmark = cell2mat(handdata.landmarks(31));
 
-
+cost = computeCost(sample31_mask, [0, 1, 0, 0], eigvec, meanShape)
 
 % (c)
+
+minimums = [-30;0.75;-200;-200];
+maximums = [30;1.25;200;200];
+
+%fuer alle Testbiler berechnen (31-50):
+for i=31:50
+    clear testimage label score imagefeat predcont predscorecont testlandmarks
+    tic
+    testimage = cell2mat(handdata.images(i)); %Testimage auswaehlen
+    [label,score,imagefeat]=predictsegmentation(rf,testimage); 
+    predscorecont= vec2mat(score(:,2),imagefeat(7,size(label,1))); %Wahrscheinlichkeit, dass ein Pixel im Hintergrund liegt.
+    
+    costFunction = makeCostFunction(pcashape,predscorecont,@costfunct);
+    drawPop = makedrawPopulation(pcashape,@drawPopulation);
+    
+    %ohne Ausgabe:
+    optparameters=optimize(costFunction,minima,maxima);
+    
+    %mit Ausgabe:
+    %imshow(testimage)
+    %hold on
+    %optparameters=optimize(costFunction,minimums,maximums,drawPop);
+    %hold off
+    
+    bnew=ones(sum((pcashape(:,2)/sum(pcashape(:,2)))>0.001),1); %nur jene Modes verwenden die mindest 0.1% der Gesamtvarianz beitragen.
+    currentshape=generateShape(bnew,pcashape(:,3:end),pcashape(:,1)',optparameters(1),optparameters(2),optparameters(3),optparameters(4));
+    
+    %Speichern der Optima:
+    optimum((i-30),1:4)=optparameters(1:4); %Optimumparameter
+    optshapes((((i-30)*2)-1):((i-30)*2),:)=currentshape; %Optimumshapes
+    opttime((i-30))=toc; %Berechnungszeit des Optimums
+end
+
+% %Darstellung der predicted und wahren Shape von image k (in unserem
+% Report fuer k=31,37)
+k=31;
+bnew=ones(sum((pcashape(:,2)/sum(pcashape(:,2)))>0.001),1); %nur jene Modes verwenden die mindest 0.1% der Gesamtvarianz beitragen.
+pcalandmarks=generateShape(bnew,pcashape(:,3:end),pcashape(:,1)',0,1,0,0);
+truelandmarks= cell2mat(handdata.landmarks(k));
+predlandmarks= optshapes(((k-31)*2+1):(k-30)*2,:);
+imshow(uint8(cell2mat(handdata.images(k))))
+hold on
+plot([truelandmarks(1,:),truelandmarks(1,1)],[truelandmarks(2,:),truelandmarks(2,1)])
+plot([predlandmarks(1,:),predlandmarks(1,1)],[predlandmarks(2,:),predlandmarks(2,1)])
+plot([pcalandmarks(1,:),pcalandmarks(1,1)],[pcalandmarks(2,:),pcalandmarks(2,1)])
+legend('TrueShape','PredictedShape','PcaShape')
+hold off
 
 % (d)
 
