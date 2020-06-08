@@ -16,60 +16,60 @@ handdata = load('handdata.mat');
 
 %% feature extraction
 
-image1 = cell2mat(handdata.images(1));
+orig_image = cell2mat(handdata.images(1));
 figure();
-imshow(image1);
-imagesccache = computeFeatures(image1);
+imshow(orig_image);
+feature_matrix = computeFeatures(orig_image);
 
-%Features Zeilenvektoren in Matrix umschreiben und darstellen.
-grayValues = vec2mat(imagesccache(1,:), 143);
-xGradient = vec2mat(imagesccache(2,:), 143);
-yGradient = vec2mat(imagesccache(3,:), 143);
-gradientStrength = vec2mat(imagesccache(4,:), 143);
-haarLike = vec2mat(imagesccache(5,:), 143);
-haarLikeGradStrength = vec2mat(imagesccache(6,:), 143);
-xCoord = vec2mat(imagesccache(7,:), 143);
-yCoord = vec2mat(imagesccache(8,:), 143);
+% Changes row vectors of features to matrix
+gray_values = vec2mat(feature_matrix(1,:), size(orig_image, 2));
+gradient_x = vec2mat(feature_matrix(2,:), size(orig_image, 2));
+gradient_y = vec2mat(feature_matrix(3,:), size(orig_image, 2));
+gradient_strength = vec2mat(feature_matrix(4,:), size(orig_image, 2));
+hl_image = vec2mat(feature_matrix(5,:), size(orig_image, 2));
+hl_gradient_strength = vec2mat(feature_matrix(6,:), size(orig_image, 2));
+coord_x = vec2mat(feature_matrix(7,:), size(orig_image, 2));
+coord_y = vec2mat(feature_matrix(8,:), size(orig_image, 2));
 
-figure;
-imagesc(grayValues);
+figure();
+imagesc(gray_values);
 axis equal
-title('gray Values');
+title('Gray Values');
 
-figure;
-imagesc(xGradient);
+figure();
+imagesc(gradient_x);
 axis equal
-title('x Gradient');
+title('X Gradient');
 
-figure;
-imagesc(yGradient);
+figure();
+imagesc(gradient_y);
 axis equal
-title('y Gradient');
+title('Y Gradient');
 
-figure;
-imagesc(gradientStrength);
+figure();
+imagesc(gradient_strength);
 axis equal
-title('gradient Strength');
+title('Gradient Strength');
 
-figure;
-imagesc(haarLike);
+figure();
+imagesc(hl_image);
 axis equal
-title('haar Like Features');
+title('Haar-like Features of Gray-Scale Image');
 
-figure;
-imagesc(haarLikeGradStrength);
+figure();
+imagesc(hl_gradient_strength);
 axis equal
-title('Haar features gradienr strength');
+title('Haar-like Features of Gradient Strength');
 
-figure;
-imagesc(xCoord);
+figure();
+imagesc(coord_x);
 axis equal
-title('x-Coordinates');
+title('X-Coordinates');
 
-figure;
-imagesc(yCoord);
+figure();
+imagesc(coord_y);
 axis equal
-title('y-Coordinates');
+title('Y-Coordinates');
 
 %% classification & feature selection
 
