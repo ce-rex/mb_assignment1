@@ -107,21 +107,23 @@ axis equal
 title('Y-Coordinates');
 
 %% classification & feature selection
-rng(1) % set seed so random pixels are always the same ones
+rng(1) % set seed so random values are always the same
     
-% a) train with the first 30 images (rest is for testing)
+% a) Compute random forest
+% train with the first 30 images (rest is for testing)
 training_images = handdata.images(1:30);
 training_masks = handdata.masks(1:30);
-%[random_forest,pcashape] = train2(training_images, training_masks, shapes);
+
 random_forest = train(training_images, training_masks);
 
-% b) inspect error
+% b) Inspect error
 error = oobError(random_forest);
 
-% c) plot
+% c) Plot error
 figure();
-title('Random Forrest Error');
 plot(random_forest.OOBPermutedVarDeltaError)
+title('Random Forrest Error');
+
 %% shape particle filters
 
 % code
