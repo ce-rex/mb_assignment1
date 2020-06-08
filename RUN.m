@@ -77,5 +77,16 @@ title('Y-Coordinates');
 
 %% shape particle filters
 
-% code
+% (a)
+
+% (b) create cost function
+
+sample31_mask = cell2mat(handdata.masks(31));
+sample31_landmark = cell2mat(handdata.landmarks(31));
+
+
+
+% (c)
+
+% (d)
 
