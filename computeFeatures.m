@@ -1,6 +1,6 @@
 function [feature_matrix] = computeFeatures(image)
 %COMPUTEFEATURES Calculates several features for the input image and returns
-% a matrix with dimension n_features x n_pixels
+% a matrix with 2ension n_features x n_pixels
 %   Calculated features: gray value of a pixel, gradient (x and y
 %   direction), gradient strength, Haar-like features on the gray scale
 %   image, Haar-like features on the gradient strength, x- and
@@ -17,11 +17,11 @@ image_gv = im2double(image);
 
 % Haar-like features calculated on gray scale image and transformation to matrix
 hl_image_vec = computeHaarLike(image_gv);
-hl_image = vec2mat(hl_image_vec(1,:),size(image_gv,1))';
+hl_image = reshape(hl_image_vec(1,:)',[], size(image_gv,2));
 
 % Haar-like features calculated on gradient strength and transformation to matrix
 hl_gradient_vec = computeHaarLike(gradient_strength);
-hl_gradient = vec2mat(hl_gradient_vec(1,:),size(image_gv,1))';
+hl_gradient = reshape(hl_gradient_vec(1,:)',[],size(image_gv,2));
 
 % Saves features in rows of feature matrix
 for i=1:size(image_gv, 1)
