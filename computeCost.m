@@ -13,8 +13,8 @@ generated_shape = generateShape(b, eigen_vectors, mean_shape, p(1), p(2), p(3), 
 total_costs=0;
 for i=1:size(generated_shape,2) 
     [c1,c2,probability] = improfile(probability_map,generated_shape(1,i),generated_shape(2,i)); 
-    % If contprob is not a number, the shape is bigger than the
-    % probability map. In this case, contprob is set to 1 since the
+    % If the probability is not a number, the shape is bigger than the
+    % probability map. In this case, the probability is set to 1 since the
     % probability that this point is part of the background is 100%.
     % Idea for better approach: distance measure (denn wenn der Punkt auch
     % nur 1 Pixel daneben ist, ist die Wahrscheinlichkeit der
