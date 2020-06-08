@@ -114,7 +114,7 @@ rng(1) % set seed so random values are always the same
 training_images = handdata.images(1:30);
 training_masks = handdata.masks(1:30);
 
-random_forest = train(training_images, training_masks);
+random_forest = trainRF(training_images, training_masks);
 
 % b) Inspect error
 error = oobError(random_forest);
