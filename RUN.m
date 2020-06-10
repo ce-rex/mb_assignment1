@@ -112,63 +112,61 @@ title('Y-Coordinates');
 
 %% shape particle filters
 
-% (a)
+%% (a)
 
-% (b) create cost function
+%% (b) create cost function
 
-sample31_mask = cell2mat(handdata.masks(31));
-sample31_landmark = cell2mat(handdata.landmarks(31));
+% load gaussian filtered GT segmentation mask as probabililty map
+probability_map_bg = abs(imgaussfilt(cell2mat(handdata.masks(31)), 5) / 10 - 1);
 
-cost = computeCost(sample31_mask, [0, 1, 0, 0], eigvec, meanShape)
+% use a reasonable setting
+b = [0, 0, 0, 0, 0];
+p = [0, 1, 60, 150, b];
 
-% (c)
+% compute cost
+cost = computeCost(probability_map_bg, p, eigvec, meanShape);
 
-minimums = [-30;0.75;-200;-200];
-maximums = [30;1.25;200;200];
+% print cost
+disp(cost)
 
-%fuer alle Testbiler berechnen (31-50):
+% visualize result
+drawFunction = ourMakeDrawFunction(probability_map_bg, eigvec, meanShape);
+figHandles = feval(drawFunction,p',1);
+drawnow
+
+%% (c) optimize
+
+% set boundaries for b
+b_min = -5 * sqrt(eigval(1:5));
+b_max = 5 * sqrt(eigval(1:5));
+
+% optimize p for all test images
 for i=31:50
-    clear testimage label score imagefeat predcont predscorecont testlandmarks
-    tic
-    testimage = cell2mat(handdata.images(i)); %Testimage auswaehlen
-    [label,score,imagefeat]=predictsegmentation(rf,testimage); 
-    predscorecont= vec2mat(score(:,2),imagefeat(7,size(label,1))); %Wahrscheinlichkeit, dass ein Pixel im Hintergrund liegt.
     
-    costFunction = makeCostFunction(pcashape,predscorecont,@costfunct);
-    drawPop = makedrawPopulation(pcashape,@drawPopulation);
+    % load gaussian filtered GT segmentation mask as probabililty map
+    probability_map_bg = abs(imgaussfilt(cell2mat(handdata.masks(i)), 5) / 10 - 1);
     
-    %ohne Ausgabe:
-    optparameters=optimize(costFunction,minima,maxima);
+    % set boundaries for all parameters
+    minima = [-45; 0.5; 0; 0; b_min];
+    maxima = [45; 2; size(probability_map_bg, 2); size(probability_map_bg, 1); b_max];
     
-    %mit Ausgabe:
-    %imshow(testimage)
-    %hold on
-    %optparameters=optimize(costFunction,minimums,maximums,drawPop);
-    %hold off
+    % close current figures
+    close all
     
-    bnew=ones(sum((pcashape(:,2)/sum(pcashape(:,2)))>0.001),1); %nur jene Modes verwenden die mindest 0.1% der Gesamtvarianz beitragen.
-    currentshape=generateShape(bnew,pcashape(:,3:end),pcashape(:,1)',optparameters(1),optparameters(2),optparameters(3),optparameters(4));
+    %testimage = cell2mat(handdata.images(i)); %Testimage auswaehlen
+    %[label,score,imagefeat]=predictsegmentation(rf,testimage); 
+    %predscorecont= vec2mat(score(:,2),imagefeat(7,size(label,1))); %Wahrscheinlichkeit, dass ein Pixel im Hintergrund liegt.
     
+    costFunction = ourMakeCostFunction(probability_map_bg, eigvec, meanShape);
+    drawFunction = ourMakeDrawFunction(probability_map_bg, eigvec, meanShape);
+    
+    % optimize and save best result
+    optparameters = optimize(costFunction, minima, maxima, drawFunction);
+        
     %Speichern der Optima:
-    optimum((i-30),1:4)=optparameters(1:4); %Optimumparameter
-    optshapes((((i-30)*2)-1):((i-30)*2),:)=currentshape; %Optimumshapes
-    opttime((i-30))=toc; %Berechnungszeit des Optimums
+    optimum((i-30),:) = optparameters; % Optimumparameter
+    %optshapes((((i-30)*2)-1):((i-30)*2),:)=currentshape; %Optimumshapes
 end
 
-% %Darstellung der predicted und wahren Shape von image k (in unserem
-% Report fuer k=31,37)
-k=31;
-bnew=ones(sum((pcashape(:,2)/sum(pcashape(:,2)))>0.001),1); %nur jene Modes verwenden die mindest 0.1% der Gesamtvarianz beitragen.
-pcalandmarks=generateShape(bnew,pcashape(:,3:end),pcashape(:,1)',0,1,0,0);
-truelandmarks= cell2mat(handdata.landmarks(k));
-predlandmarks= optshapes(((k-31)*2+1):(k-30)*2,:);
-imshow(uint8(cell2mat(handdata.images(k))))
-hold on
-plot([truelandmarks(1,:),truelandmarks(1,1)],[truelandmarks(2,:),truelandmarks(2,1)])
-plot([predlandmarks(1,:),predlandmarks(1,1)],[predlandmarks(2,:),predlandmarks(2,1)])
-plot([pcalandmarks(1,:),pcalandmarks(1,1)],[pcalandmarks(2,:),pcalandmarks(2,1)])
-legend('TrueShape','PredictedShape','PcaShape')
-hold off
-
-% (d)
+%% (d)
 
