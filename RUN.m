@@ -126,5 +126,61 @@ title('Random Forrest Error');
 
 %% shape particle filters
 
-% code
+%% (a)
+
+%% (b) create cost function
+
+% load gaussian filtered GT segmentation mask as probabililty map
+probability_map_bg = abs(imgaussfilt(cell2mat(handdata.masks(31)), 5) / 10 - 1);
+
+% use a reasonable setting
+b = [0, 0, 0, 0, 0];
+p = [0, 1, 60, 150, b];
+
+% compute cost
+cost = computeCost(probability_map_bg, p, eigvec, meanShape);
+
+% print cost
+disp(cost)
+
+% visualize result
+drawFunction = ourMakeDrawFunction(probability_map_bg, eigvec, meanShape);
+figHandles = feval(drawFunction,p',1);
+drawnow
+
+%% (c) optimize
+
+% set boundaries for b
+b_min = -5 * sqrt(eigval(1:5));
+b_max = 5 * sqrt(eigval(1:5));
+
+% optimize p for all test images
+for i=31:50
+    
+    % load gaussian filtered GT segmentation mask as probabililty map
+    probability_map_bg = abs(imgaussfilt(cell2mat(handdata.masks(i)), 5) / 10 - 1);
+    
+    % set boundaries for all parameters
+    minima = [-45; 0.5; 0; 0; b_min];
+    maxima = [45; 2; size(probability_map_bg, 2); size(probability_map_bg, 1); b_max];
+    
+    % close current figures
+    close all
+    
+    %testimage = cell2mat(handdata.images(i)); %Testimage auswaehlen
+    %[label,score,imagefeat]=predictsegmentation(rf,testimage); 
+    %predscorecont= vec2mat(score(:,2),imagefeat(7,size(label,1))); %Wahrscheinlichkeit, dass ein Pixel im Hintergrund liegt.
+    
+    costFunction = ourMakeCostFunction(probability_map_bg, eigvec, meanShape);
+    drawFunction = ourMakeDrawFunction(probability_map_bg, eigvec, meanShape);
+    
+    % optimize and save best result
+    optparameters = optimize(costFunction, minima, maxima, drawFunction);
+        
+    %Speichern der Optima:
+    optimum((i-30),:) = optparameters; % Optimumparameter
+    %optshapes((((i-30)*2)-1):((i-30)*2),:)=currentshape; %Optimumshapes
+end
+
+%% (d)
 
