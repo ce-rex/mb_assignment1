@@ -10,12 +10,12 @@ addpath(providedFunctions_path);
 % Load data
 handdata = load('handdata.mat');
 
-%% shape model
+%% 1. shape model
 
-shapes = handdata.aligned;
+shapes = handdata.aligned(:,:,1:30);
 
 % flatten shapes to make them digestable for ourPca. yum
-shapes_flattened = reshape(shapes, 128, 50);
+shapes_flattened = reshape(shapes, 128, 30);
 % compute mean shape
 meanShape = mean(shapes_flattened, 2);
 % Perform pca on the flattened shapes
@@ -49,7 +49,7 @@ for i = [1, 2, 3]
 end
 legend(labels);
 
-%% feature extraction
+%% 2. feature extraction
 
 orig_image = cell2mat(handdata.images(1));
 figure();
@@ -106,27 +106,59 @@ imagesc(coord_y);
 axis equal
 title('Y-Coordinates');
 
-%% classification & feature selection
+%% 3. classification & feature selection
 rng(1) % set seed so random values are always the same
     
 % a) Compute random forest
 % train with the first 30 images (rest is for testing)
-training_images = handdata.images(1:30);
-training_masks = handdata.masks(1:30);
+train_images = handdata.images(1:30);
+train_masks = handdata.masks(1:30);
 
-random_forest = trainRF(training_images, training_masks);
+random_forest = trainRF(train_images, train_masks);
 
 % b) Inspect error
 error = oobError(random_forest);
+figure();
+plot(error)
+title('oobError');
 
 % c) Plot error
 figure();
 plot(random_forest.OOBPermutedVarDeltaError)
 title('Random Forrest Error');
 
-%% shape particle filters
+%% 4. shape particle filters
 
 %% (a)
+
+% a.1) Train (get PCA shape model from 1. and random forest from 3.)
+pca_shape_model = [meanShape, eigval, eigvec];
+
+% a.2) Predict contour in test image
+% Index of test image (31 - 50)
+image_index = 45;
+test_image = handdata.images(image_index);
+
+% Predict contour with random forest of training images
+[features, labels, scores] = predictSegmentation(test_image, random_forest);
+
+% Format predicted contour
+predict_contour = reshape(scores(:,1)', [], size(cell2mat(test_image),1))';
+predict_contour = uint8(predict_contour.*255);
+
+figure();
+imagesc(predict_contour);
+title("Predicted countour of image " + image_index);
+axis equal;
+
+% Clean up predicted contour
+contour = predict_contour > 100;
+predict_contour(contour) = 255;
+
+figure();
+imagesc(predict_contour);
+title("Cleaned up countour of image " + image_index + " (with threshold < 100)");
+axis equal;
 
 %% (b) create cost function
 
@@ -156,31 +188,32 @@ b_max = 5 * sqrt(eigval(1:5));
 
 % optimize p for all test images
 for i=31:50
-    
+
     % load gaussian filtered GT segmentation mask as probabililty map
     probability_map_bg = abs(imgaussfilt(cell2mat(handdata.masks(i)), 5) / 10 - 1);
-    
+
     % set boundaries for all parameters
     minima = [-45; 0.5; 0; 0; b_min];
     maxima = [45; 2; size(probability_map_bg, 2); size(probability_map_bg, 1); b_max];
-    
+
     % close current figures
     close all
-    
+
     %testimage = cell2mat(handdata.images(i)); %Testimage auswaehlen
-    %[label,score,imagefeat]=predictsegmentation(rf,testimage); 
+    %[label,score,imagefeat]=predictsegmentation(rf,testimage);
     %predscorecont= vec2mat(score(:,2),imagefeat(7,size(label,1))); %Wahrscheinlichkeit, dass ein Pixel im Hintergrund liegt.
-    
+
     costFunction = ourMakeCostFunction(probability_map_bg, eigvec, meanShape);
     drawFunction = ourMakeDrawFunction(probability_map_bg, eigvec, meanShape);
-    
+
     % optimize and save best result
     optparameters = optimize(costFunction, minima, maxima, drawFunction);
-        
+
     %Speichern der Optima:
     optimum((i-30),:) = optparameters; % Optimumparameter
     %optshapes((((i-30)*2)-1):((i-30)*2),:)=currentshape; %Optimumshapes
 end
 
 %% (d)
+
 
