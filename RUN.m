@@ -165,6 +165,14 @@ axis equal;
 % load gaussian filtered GT segmentation mask as probabililty map
 probability_map_bg = abs(imgaussfilt(cell2mat(handdata.masks(31)), 5) / 10 - 1);
 
+% Predict contour with random forest of training images
+test_image = handdata.images(31);
+[features, labels, scores] = predictSegmentation(test_image, random_forest);
+
+% Format predicted contour
+predict_contour = reshape(scores(:,1)', [], size(cell2mat(test_image),1))';
+probability_map_bg = predict_contour;
+
 % use a reasonable setting
 b = [0, 0, 0, 0, 0];
 p = [0, 1, 60, 150, b];
@@ -186,18 +194,27 @@ drawnow
 b_min = -5 * sqrt(eigval(1:5));
 b_max = 5 * sqrt(eigval(1:5));
 
+optimum_parameters = zeros(20, 9);
+
 % optimize p for all test images
 for i=31:50
 
-    % load gaussian filtered GT segmentation mask as probabililty map
-    probability_map_bg = abs(imgaussfilt(cell2mat(handdata.masks(i)), 5) / 10 - 1);
+    disp(i)
+    test_image = handdata.images(i);
+
+    % Predict contour with random forest of training images
+    [features, labels, scores] = predictSegmentation(test_image, random_forest);
+
+    % Format predicted contour
+    predict_contour = reshape(scores(:,1)', [], size(cell2mat(test_image),1))';
+    probability_map_bg = predict_contour;
 
     % set boundaries for all parameters
     minima = [-45; 0.5; 0; 0; b_min];
     maxima = [45; 2; size(probability_map_bg, 2); size(probability_map_bg, 1); b_max];
 
     % close current figures
-    close all
+    % close all
 
     %testimage = cell2mat(handdata.images(i)); %Testimage auswaehlen
     %[label,score,imagefeat]=predictsegmentation(rf,testimage);
@@ -207,13 +224,60 @@ for i=31:50
     drawFunction = ourMakeDrawFunction(probability_map_bg, eigvec, meanShape);
 
     % optimize and save best result
-    optparameters = optimize(costFunction, minima, maxima, drawFunction);
+    % NOTE: uncomment to perform optimization
+    % optimum_parameters((i-30),:) = optimize(costFunction, minima, maxima, drawFunction);
 
-    %Speichern der Optima:
-    optimum((i-30),:) = optparameters; % Optimumparameter
-    %optshapes((((i-30)*2)-1):((i-30)*2),:)=currentshape; %Optimumshapes
 end
 
-%% (d)
+%% (d) Evaluate segmentation performance
+% Generate a shape for each test sample given the computed optimum
+% parameters. Compare it to the ground truth. Visualize the differences for
+% the test set with a boxplot
 
+optimum_parameters = load("optimum_parameters");
+optimum_parameters = optimum_parameters.optimum_parameters;
 
+gt_shapes = handdata.landmarks;
+dice_coefficients = zeros(20, 1);
+
+for i=31:31
+    
+   test_image = handdata.images(i);
+
+   % Predict contour with random forest of training images
+   [features, labels, scores] = predictSegmentation(test_image, random_forest);
+
+   % Format predicted contour
+   predict_contour = reshape(scores(:,1)', [], size(cell2mat(test_image),1))';
+   probability_map_bg = predict_contour; 
+    
+   % generate shape given the optimum parameters
+   p = optimum_parameters((i-30),:);
+   b = p(5:end)';
+   generated_shape = generateShape(b, eigvec, meanShape, p(1), p(2), p(3), p(4)); 
+   
+   gt_shape = cell2mat(handdata.landmarks(i));
+   
+   generated_poly = polyshape(generated_shape(:,1), generated_shape(:,2));
+   gt_poly = polyshape(gt_shape(1,:), gt_shape(2,:));
+   
+   figure()
+   imshow(probability_map_bg)
+   hold on;
+   plot(gt_poly)
+   hold on;
+   plot(generated_poly);
+   title(['image #', num2str(i)])
+   lgd = legend(["ground truth", "prediction"],  'Location', 'eastoutside');
+
+   % compute intersection overlay
+   intersection = intersect(generated_poly, gt_poly);
+
+   % compute overlay metric (dice coefficient)
+   dice_coefficients(i-30) = 2 * area(intersection) / (area(generated_poly) + area(gt_poly));
+   
+end
+
+figure()
+boxplot(dice_coefficients, {'Dice coefficients'})
+title("Segmentation performance on test set")
