@@ -61,10 +61,10 @@ gray_values = reshape(feature_matrix(1,:), [], size(orig_image, 1))';
 gradient_x = reshape(feature_matrix(2,:),  [], size(orig_image, 1))';
 gradient_y = reshape(feature_matrix(3,:),  [], size(orig_image, 1))';
 gradient_strength = reshape(feature_matrix(4,:),  [], size(orig_image, 1))';
-hl_image = reshape(feature_matrix(5,:),  [], size(orig_image, 1))';
-hl_gradient_strength = reshape(feature_matrix(6,:),  [], size(orig_image, 1))';
-coord_x = reshape(feature_matrix(7,:),  [], size(orig_image, 1))';
-coord_y = reshape(feature_matrix(8,:),  [], size(orig_image, 1))';
+coord_x = reshape(feature_matrix(5,:),  [], size(orig_image, 1))';
+coord_y = reshape(feature_matrix(6,:),  [], size(orig_image, 1))';
+hl_image = feature_matrix(7:26,:);
+hl_gradient_strength = feature_matrix(27:end,:);
 
 figure();
 imagesc(gray_values);
@@ -87,12 +87,12 @@ axis equal
 title('Gradient Strength');
 
 figure();
-imagesc(hl_image);
+imagesc(reshape(hl_image(1,:)', [], size(orig_image, 2)));
 axis equal
 title('Haar-like Features of Gray-Scale Image');
 
 figure();
-imagesc(hl_gradient_strength);
+imagesc(reshape(hl_gradient_strength(1,:)', [], size(orig_image, 2)));
 axis equal
 title('Haar-like Features of Gradient Strength');
 

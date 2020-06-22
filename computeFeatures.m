@@ -1,10 +1,10 @@
 function [feature_matrix] = computeFeatures(image)
 %COMPUTEFEATURES Calculates several features for the input image and returns
-% a matrix with 2ension n_features x n_pixels
+% a matrix with dimension n_features x n_pixels
 %   Calculated features: gray value of a pixel, gradient (x and y
-%   direction), gradient strength, Haar-like features on the gray scale
-%   image, Haar-like features on the gradient strength, x- and
-%   y-coordinates of the pixel
+%   direction), gradient strength, x- and
+%   y-coordinates of the pixel, Haar-like features on the gray scale
+%   image and Haar-like features on the gradient strength
 
 % Convert image to double (necessary for some calculations)
 image_gv = im2double(image);
@@ -33,15 +33,17 @@ for i=1:size(image_gv, 1)
     feature_matrix(3,((i-1)*size(image_gv,2)+1):(i*size(image_gv,2)))=gradient_y(i,:); 
     % Gradient strength
     feature_matrix(4,((i-1)*size(image_gv,2)+1):(i*size(image_gv,2)))=gradient_strength(i,:); 
-    % Haar-like features of the gray scale image
-    feature_matrix(5,((i-1)*size(image_gv,2)+1):(i*size(image_gv,2)))=hl_image(i,:);
-    % Haar-like features of the gradient strength
-    feature_matrix(6,((i-1)*size(image_gv,2)+1):(i*size(image_gv,2)))=hl_gradient(i,:);
     % X coordinate
-    feature_matrix(7,((i-1)*size(image_gv,2)+1):(i*size(image_gv,2)))= 1:1:size(image_gv,2);
+    feature_matrix(5,((i-1)*size(image_gv,2)+1):(i*size(image_gv,2)))= 1:1:size(image_gv,2);
     % Y coordinate
-    feature_matrix(8,((i-1)*size(image_gv,2)+1):(i*size(image_gv,2)))=i*ones(1, size(image_gv,2));
+    feature_matrix(6,((i-1)*size(image_gv,2)+1):(i*size(image_gv,2)))=i*ones(1, size(image_gv,2));
+   
 end
+
+% Haar-like features of the gray scale image
+feature_matrix = [feature_matrix; hl_image_vec];
+% Haar-like features of the gradient strength
+feature_matrix = [feature_matrix; hl_gradient_vec];
 
 end
 
