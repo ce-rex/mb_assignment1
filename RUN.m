@@ -116,18 +116,23 @@ train_masks = handdata.masks(1:30);
 
 random_forest = trainRF(train_images, train_masks);
 
-% b) Inspect error
+% b) Plot oobError
 figure();
 plot(oobError(random_forest));
-xlabel 'Number of trees'
-ylabel 'Out-of-bag classification error'
+xlabel('Number of trees', 'FontSize', 12)
+ylabel('Out-of-bag classification error', 'FontSize', 12)
+ax = gca;
+ax.FontSize = 14;
 
-% c) Plot error
+% c) Plot importance of features
 figure();
+e = random_forest.OOBPermutedVarDeltaError;
 bar(random_forest.OOBPermutedVarDeltaError)
-ylabel('Importance of feature for prediction')
-xticks([1 2 3 4 5 25 45 46])
-xticklabels({'grey value','x-gradident','y-gradient','gradient magnitude','haar-like grey value (5-24)','haar-like gradient magnitude (25-44)','x-coordinate','y-coordinate'});
+ylabel('Importance of feature for prediction', 'FontSize', 12)
+ax = gca;
+ax.FontSize = 14;
+xticks([1 2 3 4 5 6 7 27])
+xticklabels({'grey value','x-gradident','y-gradient','gradient magnitude','x-coordinate','y-coordinate','haar-like grey value (7-26)','haar-like gradient magnitude (27-46)'});
 xtickangle(40);
 
 %% 4. shape particle filters
@@ -152,7 +157,7 @@ predicted_contour = reshape(scores(:,1)', [], size(cell2mat(test_image),1))';
 % Plot predicted contour
 figure();
 imagesc(predicted_contour);
-title("Predicted countour of image " + image_index);
+title("Predicted countour of image " + image_index, 'FontSize', 12);
 axis equal;
 
 % Plot original image
