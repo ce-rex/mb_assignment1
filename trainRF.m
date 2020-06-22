@@ -5,9 +5,6 @@ labels = [];
 for i=1:size(images, 2)
     % compute the features for every image
     feature = computeFeatures(cell2mat(images(i)));
-    
-    % save features of all images in one matrix
-    features = [features,feature];
 
     % save current mask as row vector to get the label
     % countouring pixels are 10, background pixels are 0
@@ -23,23 +20,22 @@ for i=1:size(images, 2)
     % get as many random background pixels as there are contouring pixels
     random_background = background(randperm(numel(background), num_contour_pixels)); 
     
-    % change value of random background pixels in label so they can be found again
-    label(random_background) = 1;
+    % find all data points that are either part of the contour
+    % or the random background pixels
+    data_points = [random_background, find(label == 10)];
+    
+    % extract the labels and features at the data_points for training
+    training_feature = feature(:, data_points);
+    training_label = label(data_points);
+    
+    % save features of all images in one matrix
+    features = [features,training_feature];
 
     % save labels of all images in one matrix
-    labels=[labels,label];
+    labels=[labels,training_label];
     
 end
 
-% get all pixels that are relevant for training (1, 10)
-training_pixels = find(labels ~= 0);
-
-% get the labels of the relevant pixels
-training_labels = labels(training_pixels);
-
-% get the features of the relevant pixels
-training_features = features(:, training_pixels);
-
 % compute random forest (32 trees) 
-random_forest = TreeBagger(32,training_features',training_labels','OOBVarImp','on');
+random_forest = TreeBagger(32,features',labels','OOBVarImp','on');
 end
