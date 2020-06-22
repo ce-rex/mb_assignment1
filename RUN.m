@@ -116,16 +116,21 @@ train_masks = handdata.masks(1:30);
 
 random_forest = trainRF(train_images, train_masks);
 
-% b) Inspect error
-error = oobError(random_forest);
+%% b) Inspect error
 figure();
-plot(error)
-title('oobError');
+plot(oobError(random_forest));
+xlabel 'Number of trees'
+ylabel 'Out-of-bag classification error'
 
-% c) Plot error
+%% c) Plot error
 figure();
-plot(random_forest.OOBPermutedVarDeltaError)
-title('Random Forrest Error');
+bar(random_forest.OOBPermutedVarDeltaError)
+xlabel('Features');
+ylabel('Importance of feature for prediction')
+h = gca;
+h.XTickLabel = ({'grey value','x-gradident','y-gradient','gradient magnitude','haar-like grey value','gradient magnitude','x-coordinate','y-coordinate'});
+h.XTickLabelRotation = 30;
+h.TickLabelInterpreter = 'none';
 
 %% 4. shape particle filters
 % a.1) Train (get PCA shape model from 1. and random forest from 3.)
@@ -133,26 +138,33 @@ pca_shape_model = [meanShape, eigval, eigvec];
 
 % a.2) Predict contour in test image
 % Index of test image (31 - 50)
-image_index = 45; 
+image_index = 50; 
 test_image = handdata.images(image_index);
 
 % Predict contour with random forest of training images
 [features, labels, scores] = predictSegmentation(test_image, random_forest); 
 
-% Format predicted contour
-predict_contour = reshape(scores(:,1)', [], size(cell2mat(test_image),1))';
-predict_contour = uint8(predict_contour.*255);
+%% Format predicted contour
+predicted_contour = reshape(scores(:,1)', [], size(cell2mat(test_image),1))';
 
 figure();
-imagesc(predict_contour);
+imagesc(predicted_contour);
 title("Predicted countour of image " + image_index);
 axis equal;
 
-% Clean up predicted contour
-contour = predict_contour > 100;
-predict_contour(contour) = 255;
+% Clean up predicted contour by setting uncertain contour pixels 
+% to 1 (background)
+clean_contour = predicted_contour;
+brackground = clean_contour > 0.4;
+clean_contour(brackground) = 1;
 
 figure();
-imagesc(predict_contour);
-title("Cleaned up countour of image " + image_index + " (with threshold < 100)");
+imagesc(clean_contour);
+title("Cleaned up countour of image " + image_index);
+axis equal;
+
+% Plot original image
+figure();
+imagesc(cell2mat(test_image));
+title("Original image " + image_index);
 axis equal;
