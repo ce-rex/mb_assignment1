@@ -116,28 +116,24 @@ train_masks = handdata.masks(1:30);
 
 random_forest = trainRF(train_images, train_masks);
 
-%% b) Inspect error
+% b) Inspect error
 figure();
 plot(oobError(random_forest));
 xlabel 'Number of trees'
 ylabel 'Out-of-bag classification error'
 
-%% c) Plot error
+% c) Plot error
 figure();
 bar(random_forest.OOBPermutedVarDeltaError)
-xlabel('Features');
 ylabel('Importance of feature for prediction')
-h = gca;
-h.XTickLabel = ({'grey value','x-gradident','y-gradient','gradient magnitude','haar-like grey value','gradient magnitude','x-coordinate','y-coordinate'});
-h.XTickLabelRotation = 30;
-h.TickLabelInterpreter = 'none';
+xticks([1 2 3 4 5 25 45 46])
+xticklabels({'grey value','x-gradident','y-gradient','gradient magnitude','haar-like grey value (5-24)','haar-like gradient magnitude (25-44)','x-coordinate','y-coordinate'});
+xtickangle(40);
 
 %% 4. shape particle filters
-
-%% (a)
-
-% a.1) Train (get PCA shape model from 1. and random forest from 3.)
-pca_shape_model = [meanShape, eigval, eigvec];
+% (a)
+% a.1) Train
+[pca_shape_model, random_forest] = train(train_images, train_masks, shapes_flattened);
 
 % a.2) Predict contour in test image
 % Index of test image (31 - 50)
@@ -147,23 +143,13 @@ test_image = handdata.images(image_index);
 % Predict contour with random forest of training images
 [features, labels, scores] = predictSegmentation(test_image, random_forest);
 
-%% Format predicted contour
+% Reformat predicted contour
 predicted_contour = reshape(scores(:,1)', [], size(cell2mat(test_image),1))';
 
+% Plot predicted contour
 figure();
 imagesc(predicted_contour);
 title("Predicted countour of image " + image_index);
-axis equal;
-
-% Clean up predicted contour by setting uncertain contour pixels 
-% to 1 (background)
-clean_contour = predicted_contour;
-brackground = clean_contour > 0.4;
-clean_contour(brackground) = 1;
-
-figure();
-imagesc(clean_contour);
-title("Cleaned up countour of image " + image_index);
 axis equal;
 
 % Plot original image

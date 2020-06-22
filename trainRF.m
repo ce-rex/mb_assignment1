@@ -24,7 +24,7 @@ for i=1:size(images, 2)
     % or the random background pixels
     data_points = [random_background, find(label == 10)];
     
-    % extract the labels and features at the data_points for training
+    % extract the labels and features at data_points for training
     training_feature = feature(:, data_points);
     training_label = label(data_points);
     
