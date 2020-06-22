@@ -134,6 +134,9 @@ xtickangle(40);
 % (a)
 % a.1) Train
 [pca_shape_model, random_forest] = train(train_images, train_masks, shapes_flattened);
+meanShape = cell2mat(pca_shape_model(1));
+eigval = cell2mat(pca_shape_model(2));
+eigvec = cell2mat(pca_shape_model(3));
 
 % a.2) Predict contour in test image
 % Index of test image (31 - 50)
@@ -160,18 +163,15 @@ axis equal;
 
 %% (b) create cost function
 
-% load gaussian filtered GT segmentation mask as probabililty map
-probability_map_bg = abs(imgaussfilt(cell2mat(handdata.masks(31)), 5) / 10 - 1);
-
 % Predict contour with random forest of training images
 test_image = handdata.images(31);
 [features, labels, scores] = predictSegmentation(test_image, random_forest);
 
 % Format predicted contour
 predict_contour = reshape(scores(:,1)', [], size(cell2mat(test_image),1))';
-probability_map_bg = predict_contour;
+probability_map_bg = predict_contour; % pixel-wise "probability" that pixel is background
 
-% use a reasonable setting
+% use a reasonable setting for a shape to use as an (imperfect) overlay
 b = [0, 0, 0, 0, 0];
 p = [0, 1, 60, 150, b];
 
@@ -179,7 +179,7 @@ p = [0, 1, 60, 150, b];
 cost = computeCost(probability_map_bg, p, eigvec, meanShape);
 
 % print cost
-disp(cost)
+disp(['Cost: ', num2str(cost)])
 
 % visualize result
 drawFunction = ourMakeDrawFunction(probability_map_bg, eigvec, meanShape);

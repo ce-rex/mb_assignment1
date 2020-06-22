@@ -5,7 +5,7 @@ function [pca_shape_model, random_forest] = train(images, masks, shapes)
     
     % Compute PCA
     [eigen_values, eigen_vectors] = ourPca(shapes);
-    pca_shape_model = [shapes_mean, eigen_values, eigen_vectors]; 
+    pca_shape_model = {shapes_mean, eigen_values, eigen_vectors}; 
     
     % 2. Compute random forest
     random_forest = trainRF(images, masks);
