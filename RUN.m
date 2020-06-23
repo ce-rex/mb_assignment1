@@ -193,7 +193,7 @@ drawnow
 
 %% (c) optimize
 
-% set boundaries for b
+% set suitable boundaries for b (-5 to 5 times standard deviation)
 b_min = -5 * sqrt(eigval(1:5));
 b_max = 5 * sqrt(eigval(1:5));
 
@@ -224,7 +224,7 @@ for i=31:50
     %predscorecont= vec2mat(score(:,2),imagefeat(7,size(label,1))); %Wahrscheinlichkeit, dass ein Pixel im Hintergrund liegt.
 
     costFunction = ourMakeCostFunction(probability_map_bg, eigvec, meanShape);
-    drawFunction = ourMakeDrawFunction(probability_map_bg, eigvec, meanShape);
+    % drawFunction = ourMakeDrawFunction(probability_map_bg, eigvec, meanShape);
 
     % optimize and save best result
     % NOTE: uncomment to perform optimization
@@ -237,13 +237,13 @@ end
 % parameters. Compare it to the ground truth. Visualize the differences for
 % the test set with a boxplot
 
-optimum_parameters = load("optimum_parameters");
+optimum_parameters = load("optimum_parameters_46features");
 optimum_parameters = optimum_parameters.optimum_parameters;
 
 gt_shapes = handdata.landmarks;
 dice_coefficients = zeros(20, 1);
 
-for i=31:31
+for i=31:50
     
    test_image = handdata.images(i);
 
@@ -263,15 +263,16 @@ for i=31:31
    
    generated_poly = polyshape(generated_shape(:,1), generated_shape(:,2));
    gt_poly = polyshape(gt_shape(1,:), gt_shape(2,:));
-   
-   figure()
-   imshow(probability_map_bg)
-   hold on;
-   plot(gt_poly)
-   hold on;
-   plot(generated_poly);
-   title(['image #', num2str(i)])
-   lgd = legend(["ground truth", "prediction"],  'Location', 'eastoutside');
+
+   % optional: visualize result for each sample
+%    figure()
+%    imshow(probability_map_bg)
+%    hold on;
+%    plot(gt_poly)
+%    hold on;
+%    plot(generated_poly);
+%    title(['image #', num2str(i)])
+%    lgd = legend(["ground truth", "prediction"],  'Location', 'eastoutside');
 
    % compute intersection overlay
    intersection = intersect(generated_poly, gt_poly);
@@ -281,6 +282,13 @@ for i=31:31
    
 end
 
+% load results for different settings
+dice_8features = load("dice_coefficients-8features");
+dice_8features = dice_8features.dice_coefficients;
+dice_1000iters = load("dice_coefficients-1000iters");
+dice_1000iters = dice_1000iters.dice_coefficients;
+
 figure()
-boxplot(dice_coefficients, {'Dice coefficients'})
-title("Segmentation performance on test set")
+boxplot([dice_coefficients, dice_8features, dice_1000iters], {'46 features, 10k convergence', '8 features, 10k convergence', '46 features, 1k convergence'})
+title("Segmentation performance on test set (Dice score)");
+xtickangle(40);
